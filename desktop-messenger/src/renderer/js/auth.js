@@ -1,7 +1,7 @@
 class AuthManager {
     static async login(email, password) {
         try {
-            const response = await fetch('http://localhost:8080/api/auth/login', {
+            const response = await fetch('http://localhost:8000/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ class AuthManager {
         try {
             const token = await Storage.getAuthToken();
             if (token) {
-                await fetch('http://localhost:8080/api/auth/logout', {
+                await fetch('http://localhost:8000/api/auth/logout', {
                     method: 'POST',
                     credentials: 'include'
                 });
@@ -50,7 +50,7 @@ class AuthManager {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/auth/profile', {
+            const response = await fetch('http://localhost:8000/api/auth/profile', {
                 credentials: 'include'
             });
 
@@ -74,7 +74,7 @@ class AuthManager {
             // Set session cookie for API requests
             document.cookie = `session_id=${token}; path=/`;
             
-            const response = await fetch('http://localhost:8080/api/chat/followed-users', {
+            const response = await fetch('http://localhost:8000/api/chat/followed-users', {
                 credentials: 'include'
             });
 
@@ -96,7 +96,7 @@ class AuthManager {
         try {
             document.cookie = `session_id=${token}; path=/`;
             
-            const response = await fetch(`http://localhost:8080/api/chat/messages/private/${otherUserId}?limit=${limit}&offset=${offset}`, {
+            const response = await fetch(`http://localhost:8000/api/chat/messages/private/${otherUserId}?limit=${limit}&offset=${offset}`, {
                 credentials: 'include'
             });
 
@@ -118,7 +118,7 @@ class AuthManager {
         try {
             document.cookie = `session_id=${token}; path=/`;
             
-            const response = await fetch('http://localhost:8080/api/chat/online', {
+            const response = await fetch('http://localhost:8000/api/chat/online', {
                 credentials: 'include'
             });
 
