@@ -47,8 +47,9 @@ type LoginRequest struct {
 }
 
 type AuthResponse struct {
-	User    *models.UserResponse `json:"user"`
-	Message string               `json:"message"`
+	User         *models.UserResponse `json:"user"`
+	Message      string               `json:"message"`
+	SessionToken string               `json:"session_token,omitempty"`
 }
 
 func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -198,8 +199,9 @@ func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Return success response
 	response := &AuthResponse{
-		User:    user.ToResponse(),
-		Message: "Login successful",
+		User:         user.ToResponse(),
+		Message:      "Login successful",
+		SessionToken: session.ID,
 	}
 
 	utils.WriteSuccessResponse(w, http.StatusOK, response)

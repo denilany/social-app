@@ -11,13 +11,7 @@ class Storage {
         return await window.electronAPI.deleteStoredData(key);
     }
 
-    static async getAuthToken() {
-        return await this.get('authToken');
-    }
 
-    static async setAuthToken(token) {
-        return await this.set('authToken', token);
-    }
 
     static async getUserData() {
         return await this.get('userData');
@@ -45,7 +39,6 @@ class Storage {
     }
 
     static async clearAuth() {
-        await this.delete('authToken');
         await this.delete('userData');
     }
 }

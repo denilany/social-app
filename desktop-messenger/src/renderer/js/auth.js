@@ -13,11 +13,11 @@ class AuthManager {
             const data = await response.json();
 
             if (response.ok) {
-                await Storage.setAuthToken(data.session_token);
-                await Storage.setUserData(data.user);
-                return { success: true, user: data.user };
+                // Store user data locally for offline access
+                await Storage.setUserData(data.data.user);
+                return { success: true, user: data.data.user };
             } else {
-                return { success: false, error: data.error || 'Login failed' };
+                return { success: false, error: data.error?.message || data.message || 'Login failed' };
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -27,13 +27,10 @@ class AuthManager {
 
     static async logout() {
         try {
-            const token = await Storage.getAuthToken();
-            if (token) {
-                await fetch('http://localhost:8000/api/auth/logout', {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-            }
+            await fetch('http://localhost:8000/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
@@ -42,38 +39,33 @@ class AuthManager {
     }
 
     static async checkAuthStatus() {
-        const token = await Storage.getAuthToken();
-        const userData = await Storage.getUserData();
-
-        if (!token || !userData) {
-            return { isAuthenticated: false };
-        }
-
         try {
             const response = await fetch('http://localhost:8000/api/auth/profile', {
                 credentials: 'include'
             });
 
             if (response.ok) {
-                return { isAuthenticated: true, user: userData };
+                const data = await response.json();
+                // Update stored user data
+                await Storage.setUserData(data.data);
+                return { isAuthenticated: true, user: data.data };
             } else {
                 await Storage.clearAuth();
                 return { isAuthenticated: false };
             }
         } catch (error) {
             console.error('Auth check error:', error);
-            return { isAuthenticated: true, user: userData }; // Assume valid if offline
+            // Try to use cached user data if offline
+            const userData = await Storage.getUserData();
+            if (userData) {
+                return { isAuthenticated: true, user: userData };
+            }
+            return { isAuthenticated: false };
         }
     }
 
     static async getContacts() {
-        const token = await Storage.getAuthToken();
-        if (!token) return [];
-
         try {
-            // Set session cookie for API requests
-            document.cookie = `session_id=${token}; path=/`;
-            
             const response = await fetch('http://localhost:8000/api/chat/followed-users', {
                 credentials: 'include'
             });
@@ -90,12 +82,7 @@ class AuthManager {
     }
 
     static async getMessageHistory(otherUserId, limit = 50, offset = 0) {
-        const token = await Storage.getAuthToken();
-        if (!token) return [];
-
         try {
-            document.cookie = `session_id=${token}; path=/`;
-            
             const response = await fetch(`http://localhost:8000/api/chat/messages/private/${otherUserId}?limit=${limit}&offset=${offset}`, {
                 credentials: 'include'
             });
@@ -112,12 +99,7 @@ class AuthManager {
     }
 
     static async getOnlineUsers() {
-        const token = await Storage.getAuthToken();
-        if (!token) return [];
-
         try {
-            document.cookie = `session_id=${token}; path=/`;
-            
             const response = await fetch('http://localhost:8000/api/chat/online', {
                 credentials: 'include'
             });
