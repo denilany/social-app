@@ -11,15 +11,8 @@ class App {
         
         console.log('Initializing Ripple Messenger...');
         
-        // Check authentication status
-        const authStatus = await AuthManager.checkAuthStatus();
-        
-        if (authStatus.isAuthenticated) {
-            this.currentUser = authStatus.user;
-            await this.showChatScreen();
-        } else {
-            this.showLoginScreen();
-        }
+        // Always show login screen on app load
+        this.showLoginScreen();
         
         this.setupGlobalEventListeners();
         this.isInitialized = true;
