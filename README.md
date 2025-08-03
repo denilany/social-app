@@ -11,6 +11,12 @@ Ripple is a modern social media platform built with Go (backend) and Next.js (fr
 - Commenting system
 - Follow/unfollow users
 - Feed with pagination
+- **Cross-platform desktop messenger app**
+  - Real-time messaging with WebSocket
+  - Offline message viewing
+  - Desktop notifications
+  - System tray integration
+  - Emoji picker and typing indicators
 
 ## Project Structure
 
@@ -28,12 +34,18 @@ Ripple is a modern social media platform built with Go (backend) and Next.js (fr
 - `frontend/src/contexts/` - React context providers
 - `frontend/src/services/` - API service layer
 
+### Desktop Messenger (Electron)
+
+- `desktop-messenger/src/main.js` - Main Electron process
+- `desktop-messenger/src/preload.js` - Secure IPC bridge
+- `desktop-messenger/src/renderer/` - Desktop app UI and logic
+
 ## Getting Started
 
 ### Prerequisites
 
 - Go 1.16+
-- Node.js 14+
+- Node.js 16+
 - SQLite3
 
 ### Backend Setup
@@ -51,6 +63,18 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### Desktop Messenger Setup
+
+```bash
+cd desktop-messenger
+./setup.sh  # Linux/macOS
+# OR
+npm install
+npm start
+```
+
+See [desktop-messenger/INSTALL.md](desktop-messenger/INSTALL.md) for detailed setup instructions.
 
 ## Committing Changes
 
