@@ -99,11 +99,15 @@ ipcMain.handle('get-stored-data', (event, key) => {
 });
 
 ipcMain.handle('set-stored-data', (event, key, value) => {
-  store.set(key, value);
+  if (value === undefined || value === null) {
+    store.delete(key);
+  } else {
+    store.set(key, value);
+  }
 });
 
 ipcMain.handle('delete-stored-data', (event, key) => {
-  store.delete(key);
+  return store.delete(key);
 });
 
 ipcMain.handle('show-notification', (event, options) => {
