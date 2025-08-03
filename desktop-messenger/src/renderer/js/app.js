@@ -86,7 +86,7 @@ class App {
         const userName = document.getElementById('user-name');
         const userStatus = document.getElementById('user-status');
         
-        const avatarUrl = this.currentUser.avatar ? `http://localhost:8080${this.currentUser.avatar}` : 'default-avatar.svg';
+        const avatarUrl = this.currentUser.avatar ? `http://localhost:8000${this.currentUser.avatar}` : 'default-avatar.svg';
         userAvatar.src = avatarUrl;
         userAvatar.onerror = () => { userAvatar.src = 'default-avatar.svg'; };
         userName.textContent = `${this.currentUser.first_name} ${this.currentUser.last_name}`;
