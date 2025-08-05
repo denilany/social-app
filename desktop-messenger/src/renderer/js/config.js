@@ -26,17 +26,33 @@ class Config {
         };
     }
 
-    static getDefaultHeaders() {
-        return {
+    static async getDefaultHeaders() {
+        const headers = {
             'Content-Type': 'application/json',
             'x-client': this.CLIENT_IDENTIFIER,
         };
+
+        // Add session token if available
+        try {
+            const sessionToken = await Storage.getSessionToken();
+            if (sessionToken) {
+                headers['Authorization'] = `Bearer ${sessionToken}`;
+            }
+        } catch (error) {
+            console.warn('Config: Could not retrieve session token:', error);
+        }
+
+        return headers;
     }
 
-    static getFetchOptions(additionalOptions = {}) {
+    static async getFetchOptions(additionalOptions = {}) {
+        const defaultHeaders = await this.getDefaultHeaders();
         return {
             credentials: 'include',
-            headers: this.getDefaultHeaders(),
+            headers: {
+                ...defaultHeaders,
+                ...(additionalOptions.headers || {})
+            },
             ...additionalOptions
         };
     }

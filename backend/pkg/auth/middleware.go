@@ -17,25 +17,37 @@ func (sm *SessionManager) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("AuthMiddleware: Processing request to %s", r.URL.Path)
 
-		// Get session cookie
-		cookie, err := r.Cookie("session_id")
-		if err != nil {
-			log.Printf("AuthMiddleware: No session cookie found: %v", err)
-			utils.WriteErrorResponse(w, http.StatusUnauthorized, "Authentication required")
-			return
+		var sessionID string
+		var sessionSource string
+
+		// Try to get session from Authorization header first (for desktop app)
+		authHeader := r.Header.Get("Authorization")
+		if authHeader != "" && len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+			sessionID = authHeader[7:]
+			sessionSource = "Authorization header"
+			log.Printf("AuthMiddleware: Found session token in Authorization header")
+		} else {
+			// Fall back to session cookie (for web app)
+			cookie, err := r.Cookie("session_id")
+			if err != nil {
+				log.Printf("AuthMiddleware: No session cookie or Authorization header found: %v", err)
+				utils.WriteErrorResponse(w, http.StatusUnauthorized, "Authentication required")
+				return
+			}
+			sessionID = cookie.Value
+			sessionSource = "session cookie"
+			log.Printf("AuthMiddleware: Found session cookie: %s", sessionID)
 		}
 
-		log.Printf("AuthMiddleware: Found session cookie: %s", cookie.Value)
-
 		// Validate session
-		session, err := sm.GetSession(cookie.Value)
+		session, err := sm.GetSession(sessionID)
 		if err != nil {
-			log.Printf("AuthMiddleware: Session validation failed for %s: %v", cookie.Value, err)
+			log.Printf("AuthMiddleware: Session validation failed for %s (from %s): %v", sessionID, sessionSource, err)
 			utils.WriteErrorResponse(w, http.StatusUnauthorized, "Invalid or expired session")
 			return
 		}
 
-		log.Printf("AuthMiddleware: Session validated successfully: UserID=%d", session.UserID)
+		log.Printf("AuthMiddleware: Session validated successfully: UserID=%d (from %s)", session.UserID, sessionSource)
 
 		// Add user ID to request context
 		ctx := context.WithValue(r.Context(), UserIDKey, session.UserID)

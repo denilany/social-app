@@ -10,14 +10,13 @@ class WebSocketManager {
     }
 
     async connect() {
-        const token = await Storage.getAuthToken();
+        const token = await Storage.getSessionToken();
         if (!token) return false;
 
         try {
-            // Set session cookie for WebSocket authentication
-            document.cookie = `session_id=${token}; path=/`;
-            
-            this.ws = new WebSocket(Config.ENDPOINTS.WEBSOCKET);
+            // Pass session token as query parameter for WebSocket authentication
+            const wsUrl = `${Config.ENDPOINTS.WEBSOCKET}?session_id=${encodeURIComponent(token)}`;
+            this.ws = new WebSocket(wsUrl);
             
             this.ws.onopen = () => {
                 console.log('WebSocket connected');

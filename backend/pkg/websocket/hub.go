@@ -114,18 +114,10 @@ func NewHub(db *sql.DB) *Hub {
 
 // HandleWebSocket upgrades HTTP connection to WebSocket and handles the connection
 func HandleWebSocket(hub *Hub, sm *auth.SessionManager, w http.ResponseWriter, r *http.Request) {
-	// Get session cookie
-	cookie, err := r.Cookie("session_id")
+	// Use the existing WebSocket authentication function
+	userID, err := AuthenticateWebSocket(r, sm)
 	if err != nil {
-		log.Printf("WebSocket: No session cookie found: %v", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Get session and validate
-	session, err := sm.GetSession(cookie.Value)
-	if err != nil {
-		log.Printf("WebSocket: Invalid session: %v", err)
+		log.Printf("WebSocket: Authentication failed: %v", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -149,7 +141,7 @@ func HandleWebSocket(hub *Hub, sm *auth.SessionManager, w http.ResponseWriter, r
 		hub:        hub,
 		conn:       conn,
 		send:       make(chan []byte, 256),
-		userID:     session.UserID,
+		userID:     userID,
 		lastSeen:   time.Now(),
 		userGroups: make(map[int]bool),
 	}
@@ -165,7 +157,7 @@ func HandleWebSocket(hub *Hub, sm *auth.SessionManager, w http.ResponseWriter, r
 			Timestamp: time.Now(),
 			Data: map[string]interface{}{
 				"status":  "connected",
-				"user_id": session.UserID,
+				"user_id": userID,
 			},
 		}
 		client.hub.sendToClient(client, statusMessage)

@@ -21,6 +21,14 @@ class Storage {
         return await this.set('userData', userData);
     }
 
+    static async getSessionToken() {
+        return await this.get('sessionToken');
+    }
+
+    static async setSessionToken(token) {
+        return await this.set('sessionToken', token);
+    }
+
     static async getMessages(userId) {
         const messages = await this.get('messages') || {};
         return messages[userId] || [];
@@ -40,5 +48,6 @@ class Storage {
 
     static async clearAuth() {
         await this.delete('userData');
+        await this.delete('sessionToken');
     }
 }

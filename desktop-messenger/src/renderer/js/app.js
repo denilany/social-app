@@ -8,14 +8,33 @@ class App {
 
     async initialize() {
         if (this.isInitialized) return;
-        
+
         console.log('Initializing Ripple Messenger...');
-        
-        // Always show login screen on app load
-        this.showLoginScreen();
-        
+
+        // Check if user is already authenticated
+        await this.checkExistingAuth();
+
         this.setupGlobalEventListeners();
         this.isInitialized = true;
+    }
+
+    async checkExistingAuth() {
+        try {
+            console.log('App: Checking for existing authentication...');
+            const authResult = await AuthManager.checkAuthStatus();
+
+            if (authResult.isAuthenticated) {
+                console.log('App: User is already authenticated, showing chat screen');
+                this.currentUser = authResult.user;
+                await this.showChatScreen();
+            } else {
+                console.log('App: No valid authentication found, showing login screen');
+                this.showLoginScreen();
+            }
+        } catch (error) {
+            console.error('App: Error checking authentication status:', error);
+            this.showLoginScreen();
+        }
     }
 
     showLoginScreen() {

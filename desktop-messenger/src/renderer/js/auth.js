@@ -2,9 +2,10 @@ class AuthManager {
     static async login(email, password) {
         try {
             console.log('AuthManager: Attempting login for email:', email);
+            const fetchOptions = await Config.getFetchOptions();
             const response = await fetch(Config.ENDPOINTS.AUTH.LOGIN, {
                 method: 'POST',
-                ...Config.getFetchOptions(),
+                ...fetchOptions,
                 body: JSON.stringify({ email, password })
             });
 
@@ -15,6 +16,14 @@ class AuthManager {
             if (response.ok) {
                 // Store user data locally for offline access
                 await Storage.setUserData(data.data.user);
+
+                // Store session token if provided
+                if (data.data.session_token) {
+                    await Storage.setSessionToken(data.data.session_token);
+                    console.log('AuthManager: Session token stored');
+                }
+
+                console.log(data.data.user)
                 console.log('AuthManager: Login successful, user data stored');
                 return { success: true, user: data.data.user };
             } else {
@@ -31,9 +40,10 @@ class AuthManager {
     static async logout() {
         try {
             console.log('AuthManager: Attempting logout');
+            const fetchOptions = await Config.getFetchOptions();
             await fetch(Config.ENDPOINTS.AUTH.LOGOUT, {
                 method: 'POST',
-                ...Config.getFetchOptions()
+                ...fetchOptions
             });
             console.log('AuthManager: Logout request completed');
         } catch (error) {
@@ -47,7 +57,8 @@ class AuthManager {
     static async checkAuthStatus() {
         try {
             console.log('AuthManager: Checking authentication status');
-            const response = await fetch(Config.ENDPOINTS.AUTH.PROFILE, Config.getFetchOptions());
+            const fetchOptions = await Config.getFetchOptions();
+            const response = await fetch(Config.ENDPOINTS.AUTH.PROFILE, fetchOptions);
 
             console.log('AuthManager: Auth check response status:', response.status);
 
@@ -78,7 +89,8 @@ class AuthManager {
     static async getContacts() {
         try {
             console.log('AuthManager: Fetching contacts');
-            const response = await fetch(Config.ENDPOINTS.CHAT.FOLLOWED_USERS, Config.getFetchOptions());
+            const fetchOptions = await Config.getFetchOptions();
+            const response = await fetch(Config.ENDPOINTS.CHAT.FOLLOWED_USERS, fetchOptions);
 
             console.log('AuthManager: Contacts response status:', response.status);
 
@@ -98,7 +110,8 @@ class AuthManager {
 
     static async getMessageHistory(otherUserId, limit = 50, offset = 0) {
         try {
-            const response = await fetch(`${Config.ENDPOINTS.CHAT.MESSAGES_PRIVATE(otherUserId)}?limit=${limit}&offset=${offset}`, Config.getFetchOptions());
+            const fetchOptions = await Config.getFetchOptions();
+            const response = await fetch(`${Config.ENDPOINTS.CHAT.MESSAGES_PRIVATE(otherUserId)}?limit=${limit}&offset=${offset}`, fetchOptions);
 
             if (response.ok) {
                 const data = await response.json();
@@ -113,7 +126,8 @@ class AuthManager {
 
     static async getOnlineUsers() {
         try {
-            const response = await fetch(Config.ENDPOINTS.CHAT.ONLINE_USERS, Config.getFetchOptions());
+            const fetchOptions = await Config.getFetchOptions();
+            const response = await fetch(Config.ENDPOINTS.CHAT.ONLINE_USERS, fetchOptions);
 
             if (response.ok) {
                 const data = await response.json();
