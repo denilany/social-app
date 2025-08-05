@@ -142,11 +142,11 @@ class AuthManager {
 
     static openRegistrationPage() {
         // Open the web registration page in the default browser
-        if (window.electronAPI) {
-            // We're in Electron, but can't access shell directly from renderer
-            // Instead, we'll open in a new window
-            window.open('http://localhost:3000/register', '_blank');
+        if (window.electronAPI && window.electronAPI.openExternalUrl) {
+            // Use Electron's shell.openExternal to open in system browser
+            window.electronAPI.openExternalUrl('http://localhost:3000/register');
         } else {
+            // Fallback for non-Electron environments
             window.open('http://localhost:3000/register', '_blank');
         }
     }

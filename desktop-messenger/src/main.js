@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, Notification, shell } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
 
@@ -120,4 +120,8 @@ ipcMain.handle('set-badge-count', (event, count) => {
   if (process.platform === 'darwin') {
     app.dock.setBadge(count.toString());
   }
+});
+
+ipcMain.handle('open-external-url', (_, url) => {
+  shell.openExternal(url);
 });
