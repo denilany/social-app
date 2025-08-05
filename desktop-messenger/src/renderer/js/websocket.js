@@ -17,7 +17,7 @@ class WebSocketManager {
             // Set session cookie for WebSocket authentication
             document.cookie = `session_id=${token}; path=/`;
             
-            this.ws = new WebSocket('ws://localhost:8000/ws');
+            this.ws = new WebSocket(Config.ENDPOINTS.WEBSOCKET);
             
             this.ws.onopen = () => {
                 console.log('WebSocket connected');
